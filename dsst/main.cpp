@@ -12,12 +12,6 @@ using namespace cv;
 using namespace ctr;
 
 int keyboard;
-int64 tr_work_begin;
-double tr_work_fps;
-void trWorkBegin();
-void trWorkEnd();
-string trWorkFps();
-Scalar GetBoxColor(int i);
 void processImagesDSST(char* fistFrameFilename);
 
 LARGE_INTEGER frequency;        // ticks per second
@@ -131,24 +125,22 @@ void processImagesDSST(char* fistFrameFilename) {
 			//dsst.initializeTargetModel(154 + 9 - 1, 94 + 24 - 1, 18, 48, w, h, dataYorR, dataG, dataB);   // bicycle
 			//dsst.initializeTargetModel(324 + 24 - 1, 162 + 30 - 1, 48, 60, w, h, dataYorR, dataG, dataB);   // bolt
 			//dsst.initializeTargetModel(6 + 22  - 1, 166 + 14 - 1, 43, 27, w, h, dataYorR, dataG, dataB);   // car
-		//	dsst.initializeTargetModel(150 + 41  - 1, 56 + 48 - 1, 82, 96, w, h, dataYorR, dataG, dataB);   // david
+		    //dsst.initializeTargetModel(150 + 41  - 1, 56 + 48 - 1, 82, 96, w, h, dataYorR, dataG, dataB);   // david
 			//dsst.initializeTargetModel(175 + 19  - 1, 17 + 81 - 1, 37, 162, w, h, dataYorR, dataG, dataB);   // diving
 			//dsst.initializeTargetModel(385 + 53 - 1, 142 + 45 - 1, 105, 91, w, h, dataYorR, dataG, dataB);   // drunk
 			//dsst.initializeTargetModel(147 + 42  - 1, 114 + 109 - 1, 83, 217, w, h, dataYorR, dataG, dataB);   // fernando
 			//dsst.initializeTargetModel(126 + 24  - 1, 21 + 18 - 1, 47, 36, w, h, dataYorR, dataG, dataB);   // fish1
 			//dsst.initializeTargetModel(266 + 55  - 1, 118 + 40 - 1, 110, 80, w, h, dataYorR, dataG, dataB);   // fish2
 			//dsst.initializeTargetModel(136 + 21  - 1, 28 + 62 - 1, 42, 124, w, h, dataYorR, dataG, dataB);   // gymnastics
-		//	dsst.initializeTargetModel(225 + 22  - 1, 92 + 23 - 1, 44, 46, w, h, dataYorR, dataG, dataB); // hand1
-			
-			//dsst.initializeTargetModel(150 + 23  - 1, 69 + 26 - 1, 47, 53, w, h, dataYorR, dataG, dataB);   // hand2
-			
+		    //dsst.initializeTargetModel(225 + 22  - 1, 92 + 23 - 1, 44, 46, w, h, dataYorR, dataG, dataB); // hand1	
+			//dsst.initializeTargetModel(150 + 23  - 1, 69 + 26 - 1, 47, 53, w, h, dataYorR, dataG, dataB);   // hand2		
 			//dsst.initializeTargetModel(111 + 13  - 1, 98 + 51 - 1, 26, 102, w, h, dataYorR, dataG, dataB);   // jogging
 			//dsst.initializeTargetModel(96 + 75 - 1, 58 + 73 - 1, 149, 145, w, h, dataYorR, dataG, dataB);   // motocross
 			//dsst.initializeTargetModel(439 + 24  - 1, 108 + 36 - 1, 49, 71, w, h, dataYorR, dataG, dataB);   // polarbear
-		//	dsst.initializeTargetModel(161 + 18  - 1, 174 + 44 - 1, 36, 88, w, h, dataYorR, dataG, dataB);   // skating
+		    //dsst.initializeTargetModel(161 + 18  - 1, 174 + 44 - 1, 36, 88, w, h, dataYorR, dataG, dataB);   // skating
 			//dsst.initializeTargetModel(140 + 44  - 1, 59 + 44 - 1, 88, 88, w, h, dataYorR, dataG, dataB);   // sphere
 			//dsst.initializeTargetModel(77 + 19 - 1, 93 + 25 - 1, 38, 51, w, h, dataYorR, dataG, dataB);   // sunshade
-		//	dsst.initializeTargetModel(40 + 10  - 1, 64 + 23 - 1, 20, 47, w, h, dataYorR, dataG, dataB);   // surfing
+		    //dsst.initializeTargetModel(40 + 10  - 1, 64 + 23 - 1, 20, 47, w, h, dataYorR, dataG, dataB);   // surfing
 			//dsst.initializeTargetModel(168 + 25  - 1, 80 + 25 - 1, 50, 50, w, h, dataYorR, dataG, dataB);   // torus
 			//dsst.initializeTargetModel(145 + 34  - 1, 77 + 37 - 1, 68, 74, w, h, dataYorR, dataG, dataB);   // trellis
 			//dsst.initializeTargetModel(200 + 27  - 1, 330 + 44 - 1, 54, 88, w, h, dataYorR, dataG, dataB);   // tunnel
@@ -156,21 +148,17 @@ void processImagesDSST(char* fistFrameFilename) {
 
 			dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR, dataG, dataB);   // dog
 			//dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR);   // dog
-
 			//dsst.initializeTargetModel(280 + 44 - 1, 204 + 40 - 1, 88, 80, w, h, dataYorR, dataG, dataB);   // arma
 			//dsst.initializeTargetModel(302 + 55 - 1, 156 + 25 - 1, 110, 50, w, h, dataYorR, dataG, dataB);   // tank1
 			//dsst.initializeTargetModel(7 + 314 - 1, 217 + 129 - 1, 628, 258, w, h, dataYorR, dataG, dataB);   // tank2
 		}
 		double fps = 0;
 		if (init == true) {
-			//trWorkBegin();
 			QueryPerformanceFrequency(&frequency);
 			QueryPerformanceCounter(&t1);
 			dsst.findNextLocation(dataYorR, dataG, dataB);
 			//dsst.findNextLocation(dataYorR);
 			QueryPerformanceCounter(&t2);
-			
-			//trWorkEnd();
 			fps = double(frequency.QuadPart) / double((t2.QuadPart - t1.QuadPart));
 		}
 
@@ -212,83 +200,4 @@ void processImagesDSST(char* fistFrameFilename) {
 	delete[] dataB; delete[] dataYorR; delete[] dataG;
 }
 
-inline void trWorkBegin()
-{ 
-	tr_work_begin = getTickCount();
-}
 
-inline void trWorkEnd()
-{
-    int64 delta = getTickCount() - tr_work_begin;
-    double freq = getTickFrequency();
-    tr_work_fps = freq / delta;
-}
-
-inline string trWorkFps() 
-{
-    stringstream ss;
-    ss << int(tr_work_fps);
-    return ss.str();
-}
-
-inline Scalar GetBoxColor(int i)
-{
-	cv::Scalar pixelValues;
-
-	switch(i)
-	{
-	case 0:
-		pixelValues = CV_RGB(255,0,0);
-		break;
-	case 1:
-		pixelValues = CV_RGB(0,255,0);
-		break;
-	case 2:
-		pixelValues = CV_RGB(0,0,255);
-		break;
-	case 3:
-		pixelValues = CV_RGB(255,255,0);
-		break;
-	case 4:
-		pixelValues = CV_RGB(255,0,255);
-		break;
-	case 5:
-		pixelValues = CV_RGB(0,255,255);
-		break;
-	case 6:
-		pixelValues = CV_RGB(255,255,255);
-		break;
-	case 7:
-		pixelValues = CV_RGB(128,0,128);
-		break;
-	case 8:
-		pixelValues = CV_RGB(128,128,0);
-		break;
-	case 9:
-		pixelValues = CV_RGB(128,128,128);
-		break;
-	case 10:
-		pixelValues = CV_RGB(255,128,0);
-		break;
-	case 11:
-		pixelValues = CV_RGB(0,128,128);
-		break;
-	case 12:
-		pixelValues = CV_RGB(123,50,10);
-		break;
-	case 13:
-		pixelValues = CV_RGB(10,240,126);
-		break;
-	case 14:
-		pixelValues = CV_RGB(0,128,255);
-		break;
-	case 15:
-		pixelValues = CV_RGB(128,200,20);
-		break;
-	default:
-		pixelValues = CV_RGB(255,0,0);
-		break;
-	}
-
-	return(pixelValues);
-}
