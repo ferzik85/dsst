@@ -51,7 +51,7 @@ int main()
 	//processImagesDSST("tunnel\\00000000.jpg");
 	//processImagesDSST("woman1\\00000000.jpg");
 	
-	processImagesDSST("dog24m\\00000000.jpg"); 
+	processImagesDSST("D:\\DATA\\data4DSST\\dog24m\\00000000.jpg"); 
 	//processImagesDSST("dog24s\\00000000.jpg"); // для тестирования производительности и утечек
 
 	//processImagesDSST("a3_demo6\\00000000.jpg");
@@ -62,20 +62,18 @@ int main()
 }
 
 void processImagesDSST(char* fistFrameFilename) {
-    //cv::Mat Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Mat Im = imread(fistFrameFilename);
+    cv::Mat Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
+	//cv::Mat Im = imread(fistFrameFilename);
 	if (Im.empty()){cerr << "Unable to open first image frame: " << fistFrameFilename << endl; exit(EXIT_FAILURE);}
-	cv::Mat ImRGB; cv::Mat ImRGBRes; keyboard = 0;
+	cv::Mat ImRGBRes; keyboard = 0;
 	dsst_tracker dsst; bool init = false;
 	unsigned char *dataYorR; unsigned char *dataG; unsigned char *dataB;
 	string fn(fistFrameFilename); //current image filename
 	while ((char)keyboard != 27){
 	//for (int k = 0; k < 9; k++){
-		//cv::Size dsize = cv::Size(Im.cols * 2, Im.rows * 2);
-		cv::Size dsize = cv::Size(Im.cols, Im.rows);
+		cv::Size dsize = cv::Size(Im.cols * 2, Im.rows * 2);
 		cv::resize(Im, ImRGBRes, dsize, 0, 0, INTER_LINEAR);
-		//cv::cvtColor(Im, ImRGB, CV_GRAY2BGR);
-		cv::cvtColor(Im, Im, CV_BGR2RGB);
+		//cv::cvtColor(Im, Im, CV_BGR2RGB); //for input color image
 		//get the frame number and write it on the current frame
 		size_t index = fn.find_last_of("/");
 		if (index == string::npos) { index = fn.find_last_of("\\"); }
@@ -83,7 +81,6 @@ void processImagesDSST(char* fistFrameFilename) {
 		string frameNumberString = fn.substr(index + 1, index2 - index - 1); istringstream iss(frameNumberString);
 		int frameNumber = 0; iss >> frameNumber;
 		cv::putText(ImRGBRes, "Frame: " + frameNumberString, Point(5, 15), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
-		//cv::cvtColor(Im, ImRGB, CV_BGR2RGB);
 		int w = Im.cols; int h = Im.rows;
 		if (frameNumber == 0) {
 			dataYorR = new unsigned char[Im.rows*Im.cols];
@@ -118,8 +115,7 @@ void processImagesDSST(char* fistFrameFilename) {
 
 		if (init == false) {
 
-			// dsst.initializeTargetModel(x_center, y_center, obj_width, obj_height, w, h, dataYorR, dataG, dataB);   // example
-
+			//dsst.initializeTargetModel(x_center, y_center, obj_width, obj_height, w, h, dataYorR, dataG, dataB);  // example
 			//dsst.initializeTargetModel(200 + 25  - 1, 112 + 25 - 1, 50, 50, w, h, dataYorR, dataG, dataB);   // ball
 			//dsst.initializeTargetModel(189 + 21 - 1, 211 + 56 - 1, 42, 112, w, h, dataYorR, dataG, dataB);   // basketball
 			//dsst.initializeTargetModel(154 + 9 - 1, 94 + 24 - 1, 18, 48, w, h, dataYorR, dataG, dataB);   // bicycle
@@ -145,7 +141,6 @@ void processImagesDSST(char* fistFrameFilename) {
 			//dsst.initializeTargetModel(145 + 34  - 1, 77 + 37 - 1, 68, 74, w, h, dataYorR, dataG, dataB);   // trellis
 			//dsst.initializeTargetModel(200 + 27  - 1, 330 + 44 - 1, 54, 88, w, h, dataYorR, dataG, dataB);   // tunnel
 			//dsst.initializeTargetModel(207 + 15  - 1, 117 + 51 - 1, 30, 102, w, h, dataYorR, dataG, dataB);   // woman
-
 			dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR, dataG, dataB);   // dog
 			//dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR);   // dog
 			//dsst.initializeTargetModel(280 + 44 - 1, 204 + 40 - 1, 88, 80, w, h, dataYorR, dataG, dataB);   // arma
@@ -188,8 +183,8 @@ void processImagesDSST(char* fistFrameFilename) {
 		oss << setfill('0') << setw(8) << (frameNumber + 1);
 		string nextFrameNumberString = oss.str();
 		string nextFrameFilename = prefix + nextFrameNumberString + suffix; 
-		//Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); //read the next frame
-		Im = imread(nextFrameFilename); //read the next frame	
+		Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); //read the next frame
+		//Im = imread(nextFrameFilename); //read the next frame	
 		if (Im.empty()){cerr << "Unable to open image frame: " << nextFrameFilename << endl; break; }
 		else {
 			fn.assign(nextFrameFilename); //update the path of the current frame
