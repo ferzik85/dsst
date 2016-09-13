@@ -20,11 +20,6 @@ double elapsedTime;
 
 int main()
 { 
-	// »—œŒÀ‹«Œ¬¿“‹ “ŒÀ‹ Œ  ŒÃœ»Àﬂ“Œ– —“”ƒ»»
-	// ‚ Õ≈ Œ“Œ–€’ —À”◊¿ﬂ’ ≈—“‹ œ–Œ¡À≈Ã€ — œ≈–≈√Œ–¿∆»¬¿Õ»ﬂÃ» (Ú‡ÍÓÈ ÚÂÍÂ :( )
-	// –¿¡Œ“¿≈“ œŒ —≈–Œ…  ¿–“»Õ ≈
-	// Õ”∆ÕŒ ”— Œ–ﬂ“‹
-
 	//processImagesDSST("ball\\00000000.jpg");
     //processImagesDSST("basketball\\00000000.jpg");
 	//processImagesDSST("bicycle\\00000000.jpg");
@@ -50,8 +45,7 @@ int main()
 	//processImagesDSST("trellis\\00000000.jpg");
 	//processImagesDSST("tunnel\\00000000.jpg");
 	//processImagesDSST("woman1\\00000000.jpg");
-	
-	processImagesDSST("D:\\DATA\\data4DSST\\dog24m\\00000000.jpg"); 
+	  processImagesDSST("D:\\DATA\\data4DSST\\dog24m\\00000000.jpg"); 
 	//processImagesDSST("dog24s\\00000000.jpg"); // ‰Îˇ ÚÂÒÚËÓ‚‡ÌËˇ ÔÓËÁ‚Ó‰ËÚÂÎ¸ÌÓÒÚË Ë ÛÚÂ˜ÂÍ
 
 	//processImagesDSST("a3_demo6\\00000000.jpg");
@@ -62,18 +56,26 @@ int main()
 }
 
 void processImagesDSST(char* fistFrameFilename) {
-    //cv::Mat Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
-	cv::Mat Im = imread(fistFrameFilename);
+
+	bool use_gray = true; // true - fast but maybe less precise, false - slower tracking but better
+	cv::Mat Im;
+	if (use_gray == true) 
+        Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
+	else
+		Im = imread(fistFrameFilename);
+
 	if (Im.empty()){cerr << "Unable to open first image frame: " << fistFrameFilename << endl; exit(EXIT_FAILURE);}
 	cv::Mat ImRGBRes; keyboard = 0;
 	dsst_tracker dsst; bool init = false;
 	unsigned char *dataYorR; unsigned char *dataG; unsigned char *dataB;
-	string fn(fistFrameFilename); //current image filename
-	while ((char)keyboard != 27){
-	//for (int k = 0; k < 9; k++){
+	string fn(fistFrameFilename); 
+	while ((char)keyboard != 27)
+	{
 		cv::Size dsize = cv::Size(Im.cols * 2, Im.rows * 2);
 		cv::resize(Im, ImRGBRes, dsize, 0, 0, INTER_LINEAR);
-		cv::cvtColor(Im, Im, CV_BGR2RGB); //for input color image
+		if (use_gray == true) {}
+		else
+		   cv::cvtColor(Im, Im, CV_BGR2RGB);
 		//get the frame number and write it on the current frame
 		size_t index = fn.find_last_of("/");
 		if (index == string::npos) { index = fn.find_last_of("\\"); }
@@ -88,28 +90,28 @@ void processImagesDSST(char* fistFrameFilename) {
 			dataB = new unsigned char[Im.rows*Im.cols];
 		}
 	
-		//gray
-	  /*  for (int j = 0; j < Im.rows; j++)
-		{
-			uchar* p = Im.ptr<uchar>(j);
-			for (int i = 0; i < Im.cols; i++)
-			{		
-				dataYorR[i + j*Im.cols] = p[i];
-				dataG[i + j*Im.cols] = p[i];
-				dataB[i + j*Im.cols] = p[i]; 
-			}
-		}
-*/
-		//rgb
-	    for (int j = 0; j < Im.rows; j++)
-		{
-			for (int i = 0; i < Im.cols; i++)
+		if (use_gray == true) {
+			for (int j = 0; j < Im.rows; j++)
 			{
-				dataYorR[i + j*Im.cols] = Im.at<cv::Vec3b>(j,i)[0];
-				dataG[i + j*Im.cols] = Im.at<cv::Vec3b>(j, i)[1];
-				dataB[i + j*Im.cols] = Im.at<cv::Vec3b>(j, i)[2];		
+				uchar* p = Im.ptr<uchar>(j);
+				for (int i = 0; i < Im.cols; i++)
+				{
+					dataYorR[i + j*Im.cols] = p[i];
+					dataG[i + j*Im.cols] = p[i];
+					dataB[i + j*Im.cols] = p[i];
+				}
 			}
 		}
+		else
+			for (int j = 0; j < Im.rows; j++)
+			{
+				for (int i = 0; i < Im.cols; i++)
+				{
+					dataYorR[i + j*Im.cols] = Im.at<cv::Vec3b>(j, i)[0];
+					dataG[i + j*Im.cols] = Im.at<cv::Vec3b>(j, i)[1];
+					dataB[i + j*Im.cols] = Im.at<cv::Vec3b>(j, i)[2];
+				}
+			};
 
 		int cx = 0; int cy = 0; int rw = 0; int rh = 0; float score = 0;
 
@@ -141,18 +143,29 @@ void processImagesDSST(char* fistFrameFilename) {
 			//dsst.initializeTargetModel(145 + 34  - 1, 77 + 37 - 1, 68, 74, w, h, dataYorR, dataG, dataB);   // trellis
 			//dsst.initializeTargetModel(200 + 27  - 1, 330 + 44 - 1, 54, 88, w, h, dataYorR, dataG, dataB);   // tunnel
 			//dsst.initializeTargetModel(207 + 15  - 1, 117 + 51 - 1, 30, 102, w, h, dataYorR, dataG, dataB);   // woman
-			dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR, dataG, dataB);   // dog
+
+			if (use_gray == true)
+				dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR);   // dog
+			else
+			    dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR, dataG, dataB);   // dog
+
 			//dsst.initializeTargetModel(139 + 25 - 1, 112 + 18 - 1, 51, 36, w, h, dataYorR);   // dog
 			//dsst.initializeTargetModel(280 + 44 - 1, 204 + 40 - 1, 88, 80, w, h, dataYorR, dataG, dataB);   // arma
 			//dsst.initializeTargetModel(302 + 55 - 1, 156 + 25 - 1, 110, 50, w, h, dataYorR, dataG, dataB);   // tank1
 			//dsst.initializeTargetModel(7 + 314 - 1, 217 + 129 - 1, 628, 258, w, h, dataYorR, dataG, dataB);   // tank2
 		}
+
 		double fps = 0;
+
 		if (init == true) {
 			QueryPerformanceFrequency(&frequency);
 			QueryPerformanceCounter(&t1);
-			dsst.findNextLocation(dataYorR, dataG, dataB);
-			//dsst.findNextLocation(dataYorR);
+
+			if (use_gray == true)
+				dsst.findNextLocation(dataYorR);
+			else
+				dsst.findNextLocation(dataYorR, dataG, dataB);
+
 			QueryPerformanceCounter(&t2);
 			fps = double(frequency.QuadPart) / double((t2.QuadPart - t1.QuadPart));
 		}
@@ -163,8 +176,7 @@ void processImagesDSST(char* fistFrameFilename) {
 		int  l = (cx - rw / 2);int  t = (cy - rh / 2);
 		int  r = (cx + rw / 2);int  b = (cy + rh / 2);
 		cv::rectangle(ImRGBRes,Point(2*l,2*t),Point(2*r,2*b),cvScalar(0, 255, 0),1);
-		//cv::rectangle(ImRGBRes, Point(l, t), Point(r, b), cvScalar(255, 0, 0), 2);
-		
+			
 		stringstream ss3;
 		ss3 << int(fps);
 		
@@ -177,17 +189,17 @@ void processImagesDSST(char* fistFrameFilename) {
 		//string imageToSave = "Frame/frame_" + nums + ".png";
 		//cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
-		//search for the next image in the sequence
 		ostringstream oss;
 		oss << setfill('0') << setw(8) << (frameNumber + 1);
 		string nextFrameNumberString = oss.str();
 		string nextFrameFilename = prefix + nextFrameNumberString + suffix; 
-		//Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); //read the next frame
-		Im = imread(nextFrameFilename); //read the next frame	
+		if (use_gray == true)
+			Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); 
+		else	
+		    Im = imread(nextFrameFilename); 
 		if (Im.empty()){cerr << "Unable to open image frame: " << nextFrameFilename << endl; break; }
-		else {
-			fn.assign(nextFrameFilename); //update the path of the current frame
-		}
+		else 
+			fn.assign(nextFrameFilename); 
 	}
 
 	ImRGBRes.release();Im.release();
