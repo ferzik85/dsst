@@ -80,7 +80,6 @@ float* acosTable() {
   init=true; return a1;
 }
 
-
 void gradientMagnitude( float *I, float *M, float *O, int h, int w, int d, bool full ) {
   int x, y, y1, c, h4, s; float *Gx, *Gy, *M2; 
   float *acost = acosTable(), acMult=10000.0f;
@@ -97,9 +96,9 @@ void gradientMagnitude( float *I, float *M, float *O, int h, int w, int d, bool 
   memset(Gy,0,s);
   _M2=(__m128*) M2; _Gx=(__m128*) Gx; _Gy=(__m128*) Gy;
 #else
-   M2=new float [d*h4];  
-   Gx=new float [d*h4];  
-   Gy=new float [d*h4]; 
+   M2 = (float*)fftwf_malloc(sizeof(float)*d*h4);
+   Gx = (float*)fftwf_malloc(sizeof(float)*d*h4);
+   Gy = (float*)fftwf_malloc(sizeof(float)*d*h4);
    memset(M2,0,s);
    memset(Gx,0,s);
    memset(Gy,0,s);
@@ -134,7 +133,6 @@ void gradientMagnitude( float *I, float *M, float *O, int h, int w, int d, bool 
 #endif
 	  
     }
-
     // compute gradient mangitude (M) and normalize Gx
 #ifdef SSEv2
 	  for( y=0; y<h4/4; y++ ) {
@@ -216,7 +214,7 @@ void gradientMagnitude( float *I, float *M, float *O, int h, int w, int d, bool 
 	  for( ; y<h-4; y++ )  
 		  O[y+x*h]+=(Gy[y]<0)*PI;
 		 // if (Gy[y] < 0) {
-		//	  O[y+x*h] += PI;
+		 //	  O[y+x*h] += PI;
 		 // }
 		  //else O[y+x*h]++;
 		  //else O[y+x*h]++;
@@ -230,13 +228,11 @@ void gradientMagnitude( float *I, float *M, float *O, int h, int w, int d, bool 
  _aligned_free(Gx); 
  _aligned_free(Gy); 
 #else
-  delete[] M2;  
-  delete[] Gx;  
-  delete[] Gy;   
+  fftwf_free(M2);
+  fftwf_free(Gx);
+  fftwf_free(Gy);
 #endif
-
 }
-
 
 
 // normalize gradient magnitude at each location (uses sse)
@@ -262,7 +258,6 @@ void gradMagNormalization( float *M, float *S, int h, int w, float norm ) {
 
 	for(; i<n; i++) M[i] /= (S[i] + norm);
 }
-
 
 // helper for gradHist, quantize O and M into O0, O1 and M0, M1 
 void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
@@ -331,7 +326,7 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
 {
   const int hb=h/bin, wb=w/bin, h0=hb*bin, w0=wb*bin, nb=wb*hb;
   const float s=(float)bin, sInv=1/s, sInv2=1/s/s;
-  float *H0, *H1, *M0, *M1; int x, y; int *O0, *O1;  float  xb, init;
+  float *H0, *H1, *M0, *M1; int x, y; int *O0, *O1; float  xb, init;
 
 #ifdef SSEv2
   O0=(int*)_aligned_malloc(h*sizeof(int),16); 
@@ -339,10 +334,10 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
   O1=(int*)_aligned_malloc(h*sizeof(int),16); 
   M1=(float*)_aligned_malloc(h*sizeof(float),16);
 #else
-  O0= new int [h]; 
-  M0= new float [h]; 
-  O1= new int [h];
-  M1= new float [h]; 
+  O0 = (int*)fftwf_malloc(sizeof(int)*h);
+  M0 = (float*)fftwf_malloc(sizeof(float)*h);
+  O1 = (int*)fftwf_malloc(sizeof(int)*h);
+  M1 = (float*)fftwf_malloc(sizeof(float)*h);
 #endif
 
   // main loop
@@ -371,18 +366,16 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
       else if( bin==4 ) for(y=0; y<h0;) { GH; GH; GH; GH; H1++; }
       else for( y=0; y<h0;) { for( int y1=0; y1<bin; y1++ ) { GH; } H1++; }
       #undef GH
-
 	}
-	else { // NOT TESTED WITHOUT SSE !!!! ѕадает при выключеном ссе при удалении массива Ќ
-		// interpolate using trilinear interpolation
+	else { // interpolate using trilinear interpolation
 		float ms[4], xyd, yb, xd, yd;
 #ifdef SSEv2
 		__m128 _m, _m0, _m1;
 #endif
-		bool hasLf, hasRt; int xb0, yb0;
-		if (x == 0) {init = (0 + .5f)*sInv - 0.5f;xb = init;}
-		hasLf = xb >= 0; xb0 = hasLf ? (int)xb : -1; hasRt = xb0 < wb - 1;
-		xd = xb - xb0; xb += sInv; yb = init; y = 0;
+	  bool hasLf, hasRt; int xb0, yb0;
+	  if (x == 0) { init = (0 + .5f)*sInv - 0.5f; xb = init; }
+	  hasLf = xb >= 0; xb0 = hasLf ? (int)xb : -1; hasRt = xb0 < wb - 1;
+	  xd = xb - xb0; xb += sInv; yb = init; y = 0;
       // macros for code conciseness
       #define GHinit yd=yb-yb0; yb+=sInv; H0=H+xb0*hb+yb0; xyd=xd*yd; \
         ms[0]=1-xd-yd+xyd; ms[1]=yd-xyd; ms[2]=xd-xyd; ms[3]=xyd;
@@ -408,8 +401,7 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
 				  _m=SET(0,0,ms[1],ms[0]); GH(H0+O0[y],_m,_m0); 	
 #else
 				  H1 = H0+O0[y]; *H1 += 0*M0[y]; *(H1+1) += 0*M0[y]; 
-				  *(H1+2) += ms[1]*M0[y]; 
-				  *(H1+3) += ms[0]*M0[y];	
+				  *(H1+2) += ms[1]*M0[y]; *(H1+3) += ms[0]*M0[y];	
 #endif	
 			  }
 
@@ -473,10 +465,10 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
   _aligned_free(O1);
   _aligned_free(M1);
 #else
-  delete[] O0; 
-  delete[] M0;
-  delete[] O1;
-  delete[] M1;
+  fftwf_free(O0);
+  fftwf_free(M0);
+  fftwf_free(O1);
+  fftwf_free(M1);
 #endif
 
   // normalize boundary bins which only get 7/8 of weight of interior bins
@@ -494,7 +486,7 @@ void gradientHist( float *M, float *O, float *H, int h, int w,
 float* hogNormMatrix(float *H, int nOrients, int hb, int wb, int bin) {
 	float *N, *N1, *n; int o, x, y, dx, dy, hb1 = hb + 1, wb1 = wb + 1;
 	float eps = 1e-4f / 4 / bin / bin / bin / bin; // precise backward equality
-	N = new float[hb1*wb1];
+	N = (float*)fftwf_malloc(sizeof(float)*hb1*wb1);
 	memset(N, 0, hb1*wb1*sizeof(float));
 	N1 = N + hb1 + 1;
 	for (o = 0; o<nOrients; o++) for (x = 0; x<wb; x++) for (y = 0; y<hb; y++)
@@ -547,16 +539,15 @@ void hog(float *M, float *O, float *H, int h, int w, int binSize,
 	int nOrients, int softBin, bool full, float clip)
 {
 	float *N, *R; const int hb = h / binSize, wb = w / binSize, nb = hb*wb;
-	// compute unnormalized gradient histograms
-	//R = (float*)wrCalloc(wb*hb*nOrients, sizeof(float));
-	R = new float[wb*hb*nOrients];
+	//compute unnormalized gradient histograms
+	R = (float*)fftwf_malloc(sizeof(float)*wb*hb*nOrients);
 	memset(R, 0, wb*hb*nOrients*sizeof(float));
 	gradientHist(M, O, R, h, w, binSize, nOrients, softBin, full);
 	// compute block normalization values
 	N = hogNormMatrix(R, nOrients, hb, wb, binSize);
 	// perform four normalizations per spatial block
 	hogChannels(H, R, N, hb, wb, nOrients, clip, 0);
-	delete[] N; delete [] R;
+	fftwf_free(N); fftwf_free(R);
 }
 
 // compute FHOG features
@@ -566,11 +557,11 @@ void fhog(float *M, float *O, float *H, int h, int w, int binSize,
 	const int hb = h / binSize, wb = w / binSize, nb = hb*wb, nbo = nb*nOrients;
 	float *N, *R1, *R2; int o, x;
 	// compute unnormalized constrast sensitive histograms	
-	R1 = new float[wb*hb*nOrients * 3];	//3 чтобы не падало из-за обращени€ в €чейку дл€ которой не выделена пам€ть , а так должно быть 2
+	R1 = (float*)fftwf_malloc(sizeof(float)*wb*hb*nOrients * 3);//3 чтобы не падало из-за обращени€ в €чейку дл€ которой не выделена пам€ть , а так должно быть 2
 	memset(R1, 0, wb*hb*nOrients * 3 * sizeof(float));
 	gradientHist(M, O, R1, h, w, binSize, nOrients * 2, softBin, true);
 	// compute unnormalized contrast insensitive histograms	
-	R2 = new float[wb*hb*nOrients];
+	R2 = (float*)fftwf_malloc(sizeof(float)*wb*hb*nOrients);
 	memset(R2, 0, wb*hb*nOrients * sizeof(float));
 	for (o = 0; o<nOrients; o++) 
 		for (x = 0; x<nb; x++)
@@ -581,8 +572,6 @@ void fhog(float *M, float *O, float *H, int h, int w, int binSize,
 	hogChannels(H + nbo * 0, R1, N, hb, wb, nOrients * 2, clip, 1);
 	hogChannels(H + nbo * 2, R2, N, hb, wb, nOrients * 1, clip, 1);
 	hogChannels(H + nbo * 3, R1, N, hb, wb, nOrients * 2, clip, 2);
-	//fftwf_free(R1); fftwf_free(R2); fftwf_free(N);
-	delete[] R1; 
-    delete[] R2; 
-	delete[] N; 
+	fftwf_free(R1); fftwf_free(R2); fftwf_free(N);
 }
+ 

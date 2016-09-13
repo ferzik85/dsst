@@ -40,8 +40,11 @@ namespace ctr {
 		else scale_model_max_area = _scale_model_max_area;
 		
 		dout = 28; dscale = 31;
-		xt = new float*[dout]; xtf = new fftwf_complex*[dout];
-		hf_num = new fftwf_complex*[dout];
+	
+		xt = (float**)fftwf_malloc(sizeof(float*) * dout);
+		xtf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
+	
+		hf_num = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*) * dout);
 		use_scale_4_translation_estimate = _use_scale_4_translation_estimate;
 		scale_window = new float[nScales]; scaleFactors = new float[nScales];
 		for (int ss = 0; ss < nScales; ss++)
@@ -53,27 +56,34 @@ namespace ctr {
 	{
 		for (int j = 0; j < dout; j++)
 			fftwf_destroy_plan(pxtf[j]);
-		delete[] pxtf;
+		fftwf_free(pxtf);
 		for (int i = 0; i < sizess; i++)
 			fftwf_destroy_plan(pxsf[i]);
-		delete[] pxsf;
+		fftwf_free(pxsf);
 		fftwf_destroy_plan(prespt);
 		fftwf_destroy_plan(presps);
 		fftwf_destroy_plan(pyf);
 		fftwf_destroy_plan(pysf);
 		fftwf_free(yf); fftwf_free(ysf);
-		for (int i = 0; i < dout; i++) fftwf_free(hf_num[i]); delete[] hf_num;
-	    delete[] hf_den;
-		for (int i = 0; i < dout; i++) fftwf_free(xt[i]); delete[] xt;
-		for (int i = 0; i < dout; i++) fftwf_free(xtf[i]); delete[] xtf;
+		for (int i = 0; i < dout; i++) fftwf_free(hf_num[i]); 
+		fftwf_free(hf_num);
+		fftwf_free(hf_den); 
+		for (int i = 0; i < dout; i++) fftwf_free(xt[i]); 
+		fftwf_free(xt);
+		for (int i = 0; i < dout; i++) fftwf_free(xtf[i]); 
+		fftwf_free(xtf);
 		fftwf_free(rt); fftwf_free(respt); 
 		fftwf_free(rts); fftwf_free(resps);
-		for (int i = 0; i < sizess; i++) fftwf_free(xs[i]);  delete[] xs;
-		for (int i = 0; i < sizess; i++) fftwf_free(xsf[i]); delete[] xsf;
-		for (int i = 0; i < sizess; i++) fftwf_free(sf_num[i]); delete[] sf_num;
+		for (int i = 0; i < sizess; i++) fftwf_free(xs[i]);  
+		fftwf_free(xs);
+		for (int i = 0; i < sizess; i++) fftwf_free(xsf[i]); 
+		fftwf_free(xsf);
+		for (int i = 0; i < sizess; i++) fftwf_free(sf_num[i]); 
+		fftwf_free(sf_num);
 		fftwf_free(sf_den);
 		delete[] scaleFactors;
-		delete[] scale_window; delete[] cos_window;
+		delete[] scale_window; 
+		delete[] cos_window;
 		fftwf_cleanup();
 	}
 
@@ -194,19 +204,20 @@ namespace ctr {
 
 		sizess = dscale * (scale_model_sz[0] / 4) * (scale_model_sz[1] / 4);
 
-		xs = new float*[sizess];
+		xs = (float**)fftwf_malloc(sizeof(float*)*sizess);
+
 		for (int i = 0; i < sizess; i++)
 			xs[i] = (float*)fftwf_malloc(sizeof(float) * nScales);
 
-		xsf = new fftwf_complex*[sizess];
+		xsf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*)*sizess);
 		for (int i = 0; i < sizess; i++)
 			xsf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * (nScales / 2 + 1));
 
-		pxsf = new fftwf_plan[sizess];
+		pxsf = (fftwf_plan*)fftwf_malloc(sizeof(fftwf_plan) * sizess);
 		for (int i = 0; i < sizess; i++)
 			pxsf[i] = fftwf_plan_dft_r2c_1d(nScales, xs[i], xsf[i], FFTW_MEASURE);//FFTW_ESTIMATE);
 
-		sf_num = new fftwf_complex*[sizess];
+		sf_num = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex*)*sizess);
 		for (int i = 0; i < sizess; i++)
 			sf_num[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * (nScales / 2 + 1));
 
@@ -226,7 +237,7 @@ namespace ctr {
 		for (int i = 0; i < dout; i++)
 			hf_num[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
 
-		hf_den = new float[prodszhalf];
+		hf_den = (float*)fftwf_malloc(sizeof(float) * prodszhalf);
 
 		for (int i = 0; i < dout; i++)
 			xt[i] = (float*)fftwf_malloc(sizeof(float) * sz[1] * sz[0]);
@@ -234,7 +245,7 @@ namespace ctr {
 		for (int i = 0; i < dout; i++)
 			xtf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * prodszhalf);
 
-		pxtf = new fftwf_plan[dout];
+		pxtf = (fftwf_plan*)fftwf_malloc(sizeof(fftwf_plan) * dout);
 		for (int j = 0; j < dout; j++)
 			pxtf[j] = fftwf_plan_dft_r2c_2d(sz[0], sz[1], xt[j], xtf[j], FFTW_MEASURE);//FFTW_ESTIMATE);
 
@@ -289,7 +300,11 @@ namespace ctr {
 	void dsst_tracker::get_scale_feature_map(float *In, int h, int w, int din, float **scale_sample, int s)
 	{
 		// compute fhog features in col-major order
-		int n = h*w;float *M = new float[n]; float *O = new float[n];
+		int n = h*w;
+		//float *M = new float[n]; 
+		//float *O = new float[n];
+		float *M = (float*)fftwf_malloc(sizeof(float)*n);
+		float *O = (float*)fftwf_malloc(sizeof(float)*n);
 		memset(M, 0, sizeof(float)*n);
 		memset(O, 0, sizeof(float)*n);
 		gradientMagnitude(In, M, O, h, w, din, true);
@@ -297,7 +312,8 @@ namespace ctr {
 		int hb = h / binSize; int wb = w / binSize;
 		int nb = hb*wb;
 		int nChns = nOrients * 3 + 5;
-		float *H = new float[hb*wb*nChns];
+		//float *H = new float[hb*wb*nChns];
+		float *H = (float*)fftwf_malloc(sizeof(float)*hb*wb*nChns);
 		memset(H, 0, sizeof(float)*hb*wb*nChns);
 		fhog(M, O, H, h, w, binSize, nOrients, softBin, clip);
 		// save hog features in row-major order
@@ -308,7 +324,8 @@ namespace ctr {
 					scale_sample[count][s] = H[j + i*wb + nb*c] * scale_window[s];
 					count++;
 				}
-		delete[] H; delete[] M; delete[] O;
+		//delete[] H; delete[] M; delete[] O;
+		fftwf_free(H); fftwf_free(M); fftwf_free(O);
 	}
 
 	void dsst_tracker::extract_image(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB,
