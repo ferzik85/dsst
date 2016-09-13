@@ -62,8 +62,8 @@ int main()
 }
 
 void processImagesDSST(char* fistFrameFilename) {
-    cv::Mat Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
-	//cv::Mat Im = imread(fistFrameFilename);
+    //cv::Mat Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat Im = imread(fistFrameFilename);
 	if (Im.empty()){cerr << "Unable to open first image frame: " << fistFrameFilename << endl; exit(EXIT_FAILURE);}
 	cv::Mat ImRGBRes; keyboard = 0;
 	dsst_tracker dsst; bool init = false;
@@ -73,7 +73,7 @@ void processImagesDSST(char* fistFrameFilename) {
 	//for (int k = 0; k < 9; k++){
 		cv::Size dsize = cv::Size(Im.cols * 2, Im.rows * 2);
 		cv::resize(Im, ImRGBRes, dsize, 0, 0, INTER_LINEAR);
-		//cv::cvtColor(Im, Im, CV_BGR2RGB); //for input color image
+		cv::cvtColor(Im, Im, CV_BGR2RGB); //for input color image
 		//get the frame number and write it on the current frame
 		size_t index = fn.find_last_of("/");
 		if (index == string::npos) { index = fn.find_last_of("\\"); }
@@ -89,19 +89,19 @@ void processImagesDSST(char* fistFrameFilename) {
 		}
 	
 		//gray
-	    /*for (int j = 0; j < Im.rows; j++)
+	  /*  for (int j = 0; j < Im.rows; j++)
 		{
 			uchar* p = Im.ptr<uchar>(j);
 			for (int i = 0; i < Im.cols; i++)
 			{		
 				dataYorR[i + j*Im.cols] = p[i];
 				dataG[i + j*Im.cols] = p[i];
-				dataB[i + j*Im.cols] = p[i];
+				dataB[i + j*Im.cols] = p[i]; 
 			}
-		}*/
-
+		}
+*/
 		//rgb
-		for (int j = 0; j < Im.rows; j++)
+	    for (int j = 0; j < Im.rows; j++)
 		{
 			for (int i = 0; i < Im.cols; i++)
 			{
@@ -162,36 +162,35 @@ void processImagesDSST(char* fistFrameFilename) {
 		init = true;
 		int  l = (cx - rw / 2);int  t = (cy - rh / 2);
 		int  r = (cx + rw / 2);int  b = (cy + rh / 2);
-		//cv::rectangle(ImRGBRes,Point(2*l,2*t),Point(2*r,2*b),cvScalar(0, 255, 0),1);
-		cv::rectangle(ImRGBRes, Point(l, t), Point(r, b), cvScalar(255, 0, 0), 2);
+		cv::rectangle(ImRGBRes,Point(2*l,2*t),Point(2*r,2*b),cvScalar(0, 255, 0),1);
+		//cv::rectangle(ImRGBRes, Point(l, t), Point(r, b), cvScalar(255, 0, 0), 2);
 		
 		stringstream ss3;
 		ss3 << int(fps);
 		
 		//show the current frame and the fg masks
 		stringstream ss1; ss1 << score;
-		//cv::putText(ImRGBRes, ss1.str(), cv::Point(2 * (cx - rw / 2), 2 * (cy - rh / 2 - 5)), FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 0, 255), 1, 8, false);
-		//cv::putText(ImRGBRes, "Tracker: " + trWorkFps() + "fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
-		//cv::putText(ImRGBRes, "Tracker: " + ss3.str() +"fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
+		cv::putText(ImRGBRes, ss1.str(), cv::Point(2 * (cx - rw / 2), 2 * (cy - rh / 2 - 5)), FONT_HERSHEY_SIMPLEX, 0.5, cvScalar(255, 0, 255), 1, 8, false);
+		cv::putText(ImRGBRes, "Tracker: " + ss3.str() +"fps", Point(5, 40), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(29, 45, 255));
 		cv::imshow("Tracker", ImRGBRes);
 		stringstream ostr; ostr << frameNumberString.c_str(); string nums; ostr >> nums;
-		string imageToSave = "Frame/frame_" + nums + ".png";
-		cv::imwrite(imageToSave, ImRGBRes);
+		//string imageToSave = "Frame/frame_" + nums + ".png";
+		//cv::imwrite(imageToSave, ImRGBRes);
 		keyboard = waitKey(1);
 		//search for the next image in the sequence
 		ostringstream oss;
 		oss << setfill('0') << setw(8) << (frameNumber + 1);
 		string nextFrameNumberString = oss.str();
 		string nextFrameFilename = prefix + nextFrameNumberString + suffix; 
-		Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); //read the next frame
-		//Im = imread(nextFrameFilename); //read the next frame	
+		//Im = imread(nextFrameFilename, CV_LOAD_IMAGE_GRAYSCALE); //read the next frame
+		Im = imread(nextFrameFilename); //read the next frame	
 		if (Im.empty()){cerr << "Unable to open image frame: " << nextFrameFilename << endl; break; }
 		else {
 			fn.assign(nextFrameFilename); //update the path of the current frame
 		}
 	}
 
-	ImRGBRes.release();ImRGB.release();Im.release();
+	ImRGBRes.release();Im.release();
 	delete[] dataB; delete[] dataYorR; delete[] dataG;
 }
 

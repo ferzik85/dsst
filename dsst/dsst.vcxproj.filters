@@ -24,6 +24,9 @@
     <ClInclude Include="DSSTTracker.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="sse.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gradient.cpp">

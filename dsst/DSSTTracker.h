@@ -30,7 +30,7 @@ namespace ctr { // correlation tracker namespace
 			float _scale_sigma_factor = 0.25f, float _lambda = 0.01f,
 			float _learning_rate = 0.0250f, 
 			int _number_of_scales = 33,
-			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = false);
+			float _scale_step = 1.02f, int _scale_model_max_area = 512, bool _use_scale_4_translation_estimate = true);
 
 		~dsst_tracker();
 
@@ -74,7 +74,7 @@ namespace ctr { // correlation tracker namespace
 		void make_scale_cosine_mask();
 		void make_translation_cosine_mask();
 		void get_translation_feature_map(float *In, float **Out, int h, int w, int din);
-		void get_scale_feature_map(float *In, float *temp, int h, int w, int din, float **scale_sample, int s);
+		void get_scale_feature_map(float *In, int h, int w, int din, float **scale_sample, int s);
 		void get_translation_sample(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB, float **sample); // data in row-major order
 		void get_scale_sample(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB, float **scale_sample);
 		void extract_training_sample_info(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB, bool first);
@@ -99,7 +99,6 @@ namespace ctr { // correlation tracker namespace
 		fftwf_complex **xtf;        // fourier translation test sample 
 		int dscale;
 		int sizess;
-		float *temps;
 		float **xs;                 // translation train sample (data in row-major order созданные по правилам fftw)
 		fftwf_complex **sf_num;
 		float *sf_den;

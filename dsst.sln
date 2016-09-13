@@ -7,10 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dsst", "dsst\dsst.vcxproj",
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		debRelease|Win32 = debRelease|Win32
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{525C84B2-5D29-4155-B8D4-254F2B341DC7}.debRelease|Win32.ActiveCfg = debRelease|Win32
+		{525C84B2-5D29-4155-B8D4-254F2B341DC7}.debRelease|Win32.Build.0 = debRelease|Win32
 		{525C84B2-5D29-4155-B8D4-254F2B341DC7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{525C84B2-5D29-4155-B8D4-254F2B341DC7}.Debug|Win32.Build.0 = Debug|Win32
 		{525C84B2-5D29-4155-B8D4-254F2B341DC7}.Release|Win32.ActiveCfg = Release|Win32

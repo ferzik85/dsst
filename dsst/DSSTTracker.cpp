@@ -67,7 +67,6 @@ namespace ctr {
 		for (int i = 0; i < dout; i++) fftwf_free(xt[i]); delete[] xt;
 		for (int i = 0; i < dout; i++) fftwf_free(xtf[i]); delete[] xtf;
 		fftwf_free(rt); fftwf_free(respt); 
-		delete[] temps;
 		fftwf_free(rts); fftwf_free(resps);
 		for (int i = 0; i < sizess; i++) fftwf_free(xs[i]);  delete[] xs;
 		for (int i = 0; i < sizess; i++) fftwf_free(xsf[i]); delete[] xsf;
@@ -199,9 +198,6 @@ namespace ctr {
 		for (int i = 0; i < sizess; i++)
 			xs[i] = (float*)fftwf_malloc(sizeof(float) * nScales);
 
-		temps = new float[sizess];
-
-		//xsf = (fftwf_complex**)fftwf_malloc(sizeof(fftwf_complex) * sizess);
 		xsf = new fftwf_complex*[sizess];
 		for (int i = 0; i < sizess; i++)
 			xsf[i] = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * (nScales / 2 + 1));
@@ -272,15 +268,13 @@ namespace ctr {
 						Out[0][r] = ((In[i + j*h]) / 255.0f - 0.5f) * cos_window[r];
 					}
 		//compute fhog features in col-major order
-		//float *M = new float[n]; float *O = new float[n];
 		float *M = (float*)fftwf_malloc(sizeof(float) * n);
 		float *O = (float*)fftwf_malloc(sizeof(float) * n);
 		gradientMagnitude(In, M, O, h, w, din, true);
 		int binSize = 1; int nOrients = 9; int softBin = -1; float clip = 0.2f;
 		int hb = h / binSize; int wb = w / binSize; int nChns = nOrients * 3 + 5;
-		//float *H = new float[hb*wb*nChns]; 
 		float *H = (float*)fftwf_malloc(sizeof(float) * hb*wb*nChns);
-		//memset(H, 0, sizeof(float)*hb*wb*nChns);
+		memset(H,0,sizeof(float)*hb*wb*nChns); //to be sure it is set to 0
 		fhog(M, O, H, h, w, binSize, nOrients, softBin, clip);
 		// save hog features in row-major order
 		for (int c = 0; c < dout - 1; c++)
@@ -289,23 +283,22 @@ namespace ctr {
 					r = j + i*w;
 					Out[c + 1][r] = H[i + j*h + n*c] * cos_window[r];
 				}
-		//delete[] H; delete[] M; delete[] O;
 		fftwf_free(H);	fftwf_free(M);	fftwf_free(O);
 	}
 
-	void dsst_tracker::get_scale_feature_map(float *In, float *temp, int h, int w, int din, float **scale_sample, int s)
+	void dsst_tracker::get_scale_feature_map(float *In, int h, int w, int din, float **scale_sample, int s)
 	{
 		// compute fhog features in col-major order
 		int n = h*w;float *M = new float[n]; float *O = new float[n];
-		//memset(M, 0, sizeof(float)*n);
-		//memset(O, 0, sizeof(float)*n);
+		memset(M, 0, sizeof(float)*n);
+		memset(O, 0, sizeof(float)*n);
 		gradientMagnitude(In, M, O, h, w, din, true);
 		int binSize = 4; int nOrients = 9; int softBin = -1; float clip = 0.2f;
 		int hb = h / binSize; int wb = w / binSize;
 		int nb = hb*wb;
 		int nChns = nOrients * 3 + 5;
 		float *H = new float[hb*wb*nChns];
-		//memset(H, 0, sizeof(float)*hb*wb*nChns);
+		memset(H, 0, sizeof(float)*hb*wb*nChns);
 		fhog(M, O, H, h, w, binSize, nOrients, softBin, clip);
 		// save hog features in row-major order
 		int count = 0;
@@ -411,7 +404,7 @@ namespace ctr {
 		//можно округлить значения элементов после ресемплинга
 		for (int i = 0; i < w * h * d; i++)
 		//resized_patch[i] = roundf(resized_patch[i]);
-		resized_patch[i] = (int)(resized_patch[i] + 0.5f);
+		resized_patch[i] = float((int)(resized_patch[i] + 0.5f));
 
 		// compute feature map	
 		get_translation_feature_map(resized_patch, sample, h, w, d);
@@ -422,7 +415,7 @@ namespace ctr {
 
 	void dsst_tracker::get_scale_sample(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB, float **scale_sample)
 	{
-		float *resized_patch = (float*)fftwf_malloc(sizeof(float) * scale_model_sz[0] * scale_model_sz[1] * 3);  // тут память лучше не выделять - причина неизвестна
+		//float *resized_patch = (float*)fftwf_malloc(sizeof(float) * scale_model_sz[0] * scale_model_sz[1] * 3);  // never allocate memory here because tracker stops working properly
 		for (int s = 0; s < nScales; s++)
 		{
 			int patch_sz[2]; int w = base_target_sz[1]; int h = base_target_sz[0]; // base size of the model
@@ -444,7 +437,7 @@ namespace ctr {
 			extract_image(dataYorR, dataG, dataB, pw, ph, xm, xp, ym, yp, im_patch, d);
 			
 			// выделять память только тут иначе программа в дебаге и релизе работает по разному - причина хз, как-то влияет на imResampleWrapper
-			// float *resized_patch = (float*)fftwf_malloc(sizeof(float) * scale_model_sz[0] * scale_model_sz[1] * 3);
+			float *resized_patch = (float*)fftwf_malloc(sizeof(float) * scale_model_sz[0] * scale_model_sz[1] * 3);
 			// resize image to model size (work with col-major order)
 			memset(resized_patch, 0, sizeof(float) * scale_model_sz[0] * scale_model_sz[1] * d);
 			imResampleWrapper(im_patch, resized_patch, ph, pw, scale_model_sz[0], scale_model_sz[1], d, 1.0);
@@ -452,16 +445,15 @@ namespace ctr {
 			//можно округлить значения элементов после ресемплинга
 			for (int i = 0; i < scale_model_sz[0] * scale_model_sz[1] * d; i++)
 			//resized_patch[i] = roundf(resized_patch[i]);
-			resized_patch[i] = (int)(resized_patch[i] + 0.5f);
+			resized_patch[i] = float((int)(resized_patch[i] + 0.5f));
 
 			// compute feature map	
-			memset(temps, 0, sizeof(float)*sizess);	
-			get_scale_feature_map(resized_patch, temps, scale_model_sz[0], scale_model_sz[1], d, scale_sample, s);
+			get_scale_feature_map(resized_patch, scale_model_sz[0], scale_model_sz[1], d, scale_sample, s);
 	
 			fftwf_free(im_patch);
-			//fftwf_free(resized_patch);
+			fftwf_free(resized_patch);
 		}
-		fftwf_free(resized_patch);
+		//fftwf_free(resized_patch);
 	}
 
 	void dsst_tracker::extract_training_sample_info(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB, bool first)
@@ -553,8 +545,7 @@ namespace ctr {
 				}
 				sf_den[j] = (1 - learning_rate) * sf_den[j] + learning_rate * sum_sd;
 			}
-		}
-		
+		}	
 	}
 
 	void dsst_tracker::extract_translation_test_sample(unsigned char* dataYorR, unsigned char* dataG, unsigned char* dataB)
@@ -600,7 +591,7 @@ namespace ctr {
 		}
 
 		fftwf_execute(prespt);
-		//for (int j = 0; j <prodsz; j++) respt[j] /= (sz[0] * sz[1]);
+		//for (int j = 0; j <prodsz; j++) respt[j] /= (sz[0] * sz[1]); // you can safely uncomment this line
 		
 		// find the maximum translation response
 		int mr = 0; int mc = 0; score = respt[0];
@@ -644,7 +635,7 @@ namespace ctr {
 
 		fftwf_execute(presps);
 
-		//for (int j = 0; j < nScales; j++) resps[j] /= nScales;
+		//for (int j = 0; j < nScales; j++) resps[j] /= nScales; // you can safely uncomment this line
 
 		// find the maximum scale response
 		int indx = 0; double max_val = resps[0];
@@ -665,10 +656,10 @@ namespace ctr {
 		// extract training sample
 		extract_training_sample_info(dataYorR, dataG, dataB, false);
 
-		// calculate the new target size
+		// calculate the new target size	
 		target_size[0] = (int)floorf((float(base_target_sz[0]) * currentScaleFactor));
 		target_size[1] = (int)floorf((float(base_target_sz[1]) * currentScaleFactor));
-
+	
 		return true;
 	}
 
