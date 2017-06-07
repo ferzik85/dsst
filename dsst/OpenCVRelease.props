@@ -5,6 +5,7 @@
   <PropertyGroup>
     <IncludePath>$(SDKPATH);D:\MY_SDK\OpenCV2_4_13\opencv\build\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SDKPATH);D:\MY_SDK\OpenCV2_4_13\opencv\build\x86\vc12\lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>

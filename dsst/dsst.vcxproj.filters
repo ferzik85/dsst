@@ -13,32 +13,41 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="DSST">
+      <UniqueIdentifier>{09e673ea-61eb-4dbf-b1f2-6e1815ce37a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{6d6490f7-b1a5-4a4f-9fed-010bc25053c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DSSTSettings.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="gradient.h">
-      <Filter>Source Files</Filter>
+      <Filter>DSST</Filter>
     </ClInclude>
     <ClInclude Include="DSSTTracker.h">
-      <Filter>Source Files</Filter>
+      <Filter>DSST</Filter>
     </ClInclude>
     <ClInclude Include="sse.hpp">
-      <Filter>Source Files</Filter>
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="gradient.h">
+      <Filter>misc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gradient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="imResample.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DSSTTracker.cpp">
+      <Filter>DSST</Filter>
+    </ClCompile>
+    <ClCompile Include="imResample.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="gradient.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="matlab.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

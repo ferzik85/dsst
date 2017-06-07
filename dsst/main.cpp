@@ -20,6 +20,7 @@ double elapsedTime;
 
 int main()
 { 
+
 	//processImagesDSST("ball\\00000000.jpg");
     //processImagesDSST("basketball\\00000000.jpg");
 	//processImagesDSST("bicycle\\00000000.jpg");
@@ -45,19 +46,18 @@ int main()
 	//processImagesDSST("trellis\\00000000.jpg");
 	//processImagesDSST("tunnel\\00000000.jpg");
 	//processImagesDSST("woman1\\00000000.jpg");
-	  processImagesDSST("D:\\DATA\\data4DSST\\dog24m\\00000000.jpg"); 
+	processImagesDSST("D:\\DATA\\data4DSST\\dog24m\\00000000.jpg"); 
 	//processImagesDSST("dog24s\\00000000.jpg"); // для тестирования производительности и утечек
-
 	//processImagesDSST("a3_demo6\\00000000.jpg");
 	//processImagesDSST("t90_3_x2_1\\00000000.jpg");
 	//processImagesDSST("t90_3_x2_2\\00000000.jpg");
-
+	
 	return 0;
 }
 
 void processImagesDSST(char* fistFrameFilename) {
 
-	bool use_gray = true; // true - fast but maybe less precise, false - slower tracking but better
+	bool use_gray = false; // true - fast but maybe less precise, false - slower tracking but better
 	cv::Mat Im;
 	if (use_gray == true) 
         Im = imread(fistFrameFilename, CV_LOAD_IMAGE_GRAYSCALE);
@@ -66,7 +66,8 @@ void processImagesDSST(char* fistFrameFilename) {
 
 	if (Im.empty()){cerr << "Unable to open first image frame: " << fistFrameFilename << endl; exit(EXIT_FAILURE);}
 	cv::Mat ImRGBRes; keyboard = 0;
-	dsst_tracker dsst; bool init = false;
+	dsst_tracker dsst; 
+	bool init = false;
 	unsigned char *dataYorR; unsigned char *dataG; unsigned char *dataB;
 	string fn(fistFrameFilename); 
 	while ((char)keyboard != 27)
@@ -205,5 +206,6 @@ void processImagesDSST(char* fistFrameFilename) {
 	ImRGBRes.release();Im.release();
 	delete[] dataB; delete[] dataYorR; delete[] dataG;
 }
+
 
 

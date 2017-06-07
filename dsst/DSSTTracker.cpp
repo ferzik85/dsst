@@ -24,10 +24,10 @@ namespace ctr {
 		if (_scale_sigma_factor < 0.01 && _scale_sigma_factor > 1) scale_sigma_factor = 0.25f;
 		else scale_sigma_factor = _scale_sigma_factor;
 		
-		if (_scale_sigma_factor < 0 && _scale_sigma_factor > 1) lambda = 0.01f;
+		if (_lambda < 0 && _lambda > 1) lambda = 0.01f;
 		else lambda = _lambda;
 		
-		if (_learning_rate < 0 && _learning_rate > 1) learning_rate = 0.0250f;
+		if (_learning_rate < 0 && _learning_rate > 1) learning_rate = 0.0250f; // проверить параметры!
 		else learning_rate = _learning_rate;
 
 		if (_number_of_scales < 0 && _number_of_scales > 50) nScales = 33;
@@ -59,6 +59,7 @@ namespace ctr {
 		fftwf_free(pxtf);
 		for (int i = 0; i < sizess; i++)
 			fftwf_destroy_plan(pxsf[i]);
+
 		fftwf_free(pxsf);
 		fftwf_destroy_plan(prespt);
 		fftwf_destroy_plan(presps);
@@ -254,6 +255,7 @@ namespace ctr {
 		respt = (float*)fftwf_malloc(sizeof(float) * prodsz);	
 
 		prespt = fftwf_plan_dft_c2r_2d(sz[0], sz[1], rt, respt, FFTW_MEASURE);//FFTW_ESTIMATE);
+		
 		// extract the training sample feature map for the translation filter	
 		extract_training_sample_info(dataYorR, dataG, dataB, true);
 
@@ -358,8 +360,10 @@ namespace ctr {
 			if (d == 3)
 			{
 				int c, r, n, n2; n = pw*ph; n2 = n*(d - 1);
-				if (ym >= 0 && yp <= imh &&
-					xm >= 0 && xp <= imw) {
+				/*if (ym >= 0 && yp <= imh && 
+					xm >= 0 && xp <= imw) {*/
+				if (ym >= 0 && yp <= imh - 1 &&
+					xm >= 0 && xp <= imw - 1) {
 					for (int i = ym; i < yp; i++)
 						for (int j = xm; j < xp; j++)
 						{
