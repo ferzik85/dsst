@@ -47,8 +47,5 @@
     <ClCompile Include="gradient.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="matlab.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
