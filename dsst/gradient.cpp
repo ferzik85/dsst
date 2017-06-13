@@ -277,7 +277,7 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 	_M1=(__m128*) M1;
 #endif
 
-	if( interpolate ) 
+ 	if( interpolate ) 
 #ifdef SSEv2
 		for( i=0; i<=n-4; i+=4 ) {
 			_o=MUL(LDu(O[i]),_oMult); _o0=CVT(_o); _od=SUB(_o,CVT(_o0));
@@ -303,7 +303,7 @@ void gradQuantize( float *O, float *M, int *O0, int *O1, float *M0, float *M1,
 #else
 		for( i=0; i<=n-4; i++ ) {
 			o=O[i]*oMult; o0=(int)(o+0.5f); o0 *= nb;
-			o0 = (oMax > o0) ? o0 : 0; O0[i]=o0; M0[i]*=norm; 	
+			o0 = (oMax > o0) ? o0 : 0; O0[i]=o0; M0[i]=M[i]*norm;
 			M1[i]=0.0f; O1[i]=0;
 		}  
 #endif
